@@ -7,7 +7,7 @@ package model;
 
 /**
  *
- * @author Administrator
+ * @author Jason Heyer
  */
 public class Mandelbrot {
 
