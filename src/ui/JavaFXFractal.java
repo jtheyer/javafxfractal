@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,6 +21,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -43,8 +45,8 @@ public class JavaFXFractal extends Application {
     Stage pStage;
     Canvas canvas;
     GraphicsContext g;
-    int lastMouseX = WIDTH / 2;
-    int lastMouseY = HEIGHT / 2;
+//    int lastMouseX = WIDTH / 2;
+//    int lastMouseY = HEIGHT / 2;
     double magnification = 1;
     int maxLoops = 1000;
     double xCenterReal = 0.0;
@@ -77,8 +79,10 @@ public class JavaFXFractal extends Application {
 
         // each rectangular cell can be clicked to turn it on or off
         canvas.setOnMouseClicked((MouseEvent event) -> {
-            lastMouseX = (int) event.getX();
-            lastMouseY = (int) event.getY();
+            int lastMouseX = (int) event.getX();
+            int lastMouseY = (int) event.getY();
+            xCenterReal = xCenterReal + ((lastMouseX - WIDTH / 2) * 4.0 / magnification / WIDTH);
+            yCenterReal = yCenterReal - ((lastMouseY - WIDTH / 2) * 4.0 / magnification / WIDTH);
             drawFractal();
         });
         BorderPane borderPane = new BorderPane();
@@ -105,9 +109,6 @@ public class JavaFXFractal extends Application {
 
         // increment is the pixel to pixel increment amount in real units
         double increment = 4.0 / magnification / WIDTH;
-
-        xCenterReal = xCenterReal + ((lastMouseX - WIDTH / 2) * 4.0 / magnification / WIDTH);
-        yCenterReal = yCenterReal - ((lastMouseY - WIDTH / 2) * 4.0 / magnification / WIDTH);
 
         double centerWidthReal = WIDTH / 2 * increment;
         double xTopLeftReal = xCenterReal - centerWidthReal;
@@ -138,12 +139,13 @@ public class JavaFXFractal extends Application {
                     ++i;
                 }
 
-//                int blue = i > 255 ? i % 255 : 100; //ternary if asks if i > 255? if true then do i % 255; if false, return 100;
+//                int blue = i > 255 ? i % 255 : 100;
 //                int green = i <= 255 ? i : 50;
 //                int red = i <= 255 ? i : 50;
-                int red = 100, green = 0, blue = 100;
-               // red = green = blue = i % 50 * 4 + 55; //java assigns right to left ie blue to green to red 
-               green = i % 50 * 4 + 55;
+                int red = 0, green = 255, blue = 255;
+                red = green = blue = i % 50 * 4 + 59;
+//                red= i % 50 * 4 + 59;
+
                 if (i == maxLoops) {
                     g.setFill(Color.BLACK);
                 } else {
@@ -232,7 +234,7 @@ public class JavaFXFractal extends Application {
         MenuItem zoomOut = new MenuItem("Zoom-Out");
         zoomOut.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
         zoomOut.setOnAction(e -> {
-            magnification = (magnification < 2) ? 1 : (magnification /= 2); //if entire first part is false, do whats on right side of : 
+            magnification = (magnification < 2) ? 1 : (magnification /= 2);
             drawFractal();
         });
         drawMenu.getItems().add(zoomOut);
@@ -241,14 +243,18 @@ public class JavaFXFractal extends Application {
          * *********************************************************************
          * Options Menu Section
          */
-        MenuItem maxLoops = new MenuItem("Maximum Iterations");
-        maxLoops.setAccelerator(KeyCombination.keyCombination("Ctrl+R"));
-        maxLoops.setOnAction(e -> { 
-//add popup dialog box, get max loops # then reassign maxLoops to that value;
-            
-            
+        MenuItem maxLoopsMI = new MenuItem("Maximum Loops");
+        maxLoopsMI.setAccelerator(KeyCombination.keyCombination("Ctrl+L"));
+        maxLoopsMI.setOnAction(e -> {
+            TextInputDialog dialog = new TextInputDialog("" + maxLoops);
+            dialog.setTitle("Jason's Fractal Dialog");
+            dialog.setHeaderText("Set Maximum Loops");
+            dialog.setContentText("Enter Maximum Loops: ");
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(loops
+                    -> maxLoops = Integer.parseInt(loops));
         });
-        optionsMenu.getItems().add(maxLoops);
+        optionsMenu.getItems().add(maxLoopsMI);
 
         CheckMenuItem color = new CheckMenuItem("Color Cells");
         color.setAccelerator(KeyCombination.keyCombination("Ctrl+C"));
